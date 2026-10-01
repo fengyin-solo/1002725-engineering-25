@@ -17,7 +17,11 @@
 ├── backend/                  FastAPI（Python） 后端
 │   ├── app/routers/          每个业务模块一组接口
 │   ├── app/services/         业务规则与状态流转
+│   ├── app/inspection.py     安全巡检配置加载、启动校验与幂等导入
+│   ├── config/               安全巡检配置与示例数据（随版本库发布）
 │   └── app/store.py          内存数据仓库与示例数据
+├── docs/
+│   └── safetycheck-config.md 安全巡检配置说明（要点分组、整改期限、导入规则）
 ├── .gitignore
 └── docker-compose.yml
 ```
@@ -76,3 +80,23 @@ npm run dev
   `backend/app/routers/<模块>.py`，业务规则在 `backend/app/services/<模块>.py`。
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
+
+## 安全巡检配置
+
+安全巡检的巡检要点（按巡检区域分组）、隐患等级的整改期限默认天数与示例数据，
+全部维护在 `backend/config/` 下并纳入版本管理：
+
+- 换现场、改要点、调期限只改配置，不用动业务代码；
+- 启动时校验配置依赖是否齐全，缺项直接报错并指出缺哪一个；
+- 整改期限按「发现日期 + 等级天数」确定性计算，不读系统时钟，
+  同一份配置在两个环境的结论一致；
+- 示例数据按巡检编号幂等导入，重复导入只生效一次，不覆盖已有巡检记录。
+
+详细字段、校验口径与换现场步骤见 [docs/safetycheck-config.md](docs/safetycheck-config.md)。
+
+后端测试：
+
+```bash
+cd backend
+.venv/bin/python -m unittest discover -s tests
+```

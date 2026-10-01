@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "module": "safetycheck",
+  "description": "安全巡检配置：巡检要点按巡检区域分组，整改期限默认天数按隐患等级配置。业务代码不写死任何区域、要点与天数，换现场只改本文件。",
+  "areas": [
+    {
+      "code": "BERTH",
+      "name": "码头泊位",
+      "checkpoints": [
+        {"code": "BERTH-01", "name": "系缆桩、护舷完好无变形", "risk_level": "一般"},
+        {"code": "BERTH-02", "name": "登船梯扶手牢固、防滑条齐全", "risk_level": "一般"},
+        {"code": "BERTH-03", "name": "泊位边缘救生圈、救生绳配备到位", "risk_level": "较大"}
+      ]
+    },
+    {
+      "code": "YARD",
+      "name": "堆场箱区",
+      "checkpoints": [
+        {"code": "YARD-01", "name": "箱垛堆码层数符合层高上限", "risk_level": "较大"},
+        {"code": "YARD-02", "name": "危品箱隔离距离符合积载要求", "risk_level": "重大"},
+        {"code": "YARD-03", "name": "箱区通道无杂物、消防通道畅通", "risk_level": "一般"}
+      ]
+    },
+    {
+      "code": "GATE",
+      "name": "闸口通道",
+      "checkpoints": [
+        {"code": "GATE-01", "name": "道闸、地磅与 OCR 联动正常", "risk_level": "一般"},
+        {"code": "GATE-02", "name": "车道减速带、警示标线清晰完好", "risk_level": "一般"},
+        {"code": "GATE-03", "name": "人车分流隔离栏无缺失破损", "risk_level": "较大"}
+      ]
+    },
+    {
+      "code": "DANGEROUS",
+      "name": "危险品堆场",
+      "checkpoints": [
+        {"code": "DANG-01", "name": "泄漏应急物资（沙箱、吸附棉）在有效期内", "risk_level": "重大"},
+        {"code": "DANG-02", "name": "消防泵、喷淋系统试运正常", "risk_level": "重大"},
+        {"code": "DANG-03", "name": "温湿度监控探头在线、告警阈值正确", "risk_level": "较大"}
+      ]
+    }
+  ],
+  "risk_levels": [
+    {"code": "MAJOR", "name": "重大", "deadline_days": 3},
+    {"code": "SERIOUS", "name": "较大", "deadline_days": 7},
+    {"code": "GENERAL", "name": "一般", "deadline_days": 15}
+  ]
+}
