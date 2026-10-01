@@ -1,0 +1,85 @@
+# 安全巡检配置：检查要点按巡检区域分组，整改期限默认天数按隐患等级配置。
+#
+# 这份文件只放「主数据 / 规则」，不放巡检业务记录。改巡检要点、区域或整改期限，
+# 只需要改这里并重启（或调用 /api/safetycheck/config/reload），不用动业务代码。
+#
+# 幂等：导入按文件内容的 SHA-256 判重，同一份配置重复导入只生效一次。
+# 跨环境一致：编码（code）是稳定主键，不随环境变化；整改期限由
+# 「巡检日期 + 该隐患等级的默认天数」确定性计算，两个环境结论相同。
+version: 1
+
+# 巡检依赖：启动时逐项确认第三方依赖已安装，缺哪个直接报错指出缺哪个。
+requires:
+  - name: yaml
+    import_name: yaml
+    install: "pip install PyYAML"
+    purpose: "读取与校验安全巡检 YAML 配置"
+
+# 隐患等级 -> 默认整改天数。
+# 提交隐患时若未手工指定整改期限，则按「巡检日期 + 默认天数」自动算到期日。
+hazard_levels:
+  - code: major        # 重大隐患
+    name: 重大隐患
+    default_deadline_days: 1
+  - code: serious      # 较大隐患
+    name: 较大隐患
+    default_deadline_days: 3
+  - code: general      # 一般隐患
+    name: 一般隐患
+    default_deadline_days: 7
+  - code: minor        # 轻微隐患
+    name: 轻微隐患
+    default_deadline_days: 15
+
+# 巡检区域：编码是稳定主键，跨环境保持一致；示例数据与巡检记录都引用编码。
+areas:
+  - code: apron
+    name: 码头前沿作业区
+  - code: yard
+    name: 集装箱堆场
+  - code: gate
+    name: 闸口通道
+  - code: warehouse
+    name: 危品仓库与冷链区
+
+# 检查要点按巡检区域分组。每条要点用稳定编码标识，risk_level 指向上面的隐患等级，
+# 用于该要点被标记为隐患时带出默认整改期限。
+checkpoint_groups:
+  - area: apron
+    items:
+      - code: apron-01
+        text: 岸桥轨道无障碍物、防风夹轨器处于正常状态
+        risk_level: major
+      - code: apron-02
+        text: 系缆设施完好，护舷无破损、无缺失
+        risk_level: serious
+      - code: apron-03
+        text: 作业区域警示标识齐全、夜间照明充足
+        risk_level: general
+  - area: yard
+    items:
+      - code: yard-01
+        text: 堆箱层高符合规定，危品箱隔离到位
+        risk_level: major
+      - code: yard-02
+        text: 场桥走行通道畅通，无人员与车辆侵限
+        risk_level: serious
+      - code: yard-03
+        text: 消防通道无占用，灭火器在有效期内
+        risk_level: general
+  - area: gate
+    items:
+      - code: gate-01
+        text: 道闸、地磅与 OCR 设备运行正常
+        risk_level: general
+      - code: gate-02
+        text: 车道隔离设施完好，人车分流清晰
+        risk_level: minor
+  - area: warehouse
+    items:
+      - code: warehouse-01
+        text: 危品库通风、防爆与温湿度监测正常
+        risk_level: major
+      - code: warehouse-02
+        text: 冷链插电桩无裸露、漏电保护有效
+        risk_level: serious

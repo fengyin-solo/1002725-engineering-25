@@ -27,6 +27,20 @@ class Store:
                 return row
         return None
 
+    def find_by_key(self, module: str, key_field: str, key_value: Any) -> dict[str, Any] | None:
+        """按稳定业务键（如巡检编号）查找；初始化示例数据时用于判重，避免覆盖既有记录。"""
+        for row in self.rows(module):
+            if str(row.get(key_field) or "") == str(key_value):
+                return row
+        return None
+
+    def next_id(self, module: str) -> int:
+        return max((int(row.get("id", 0)) for row in self.rows(module)), default=0) + 1
+
+    def clear(self, module: str) -> None:
+        """清空某模块数据；仅供测试隔离使用。"""
+        self._tables[module] = []
+
     def overview(self) -> dict[str, object]:
         modules: list[dict[str, object]] = []
         for name in self.module_names():
